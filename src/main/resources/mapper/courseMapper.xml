@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.yeohaengdam.course.mapper.CourseMapper">
+
+    <resultMap id="list" type="com.ssafy.yeohaengdam.course.dto.CourseData$ListUp">
+        <result column="course_id" property="courseId"></result>
+        <result column="title" property="title"></result>
+        <result column="description" property="description"></result>
+    </resultMap>
+
+    <resultMap id="detail" type="com.ssafy.yeohaengdam.course.dto.CourseData$Detail">
+        <result column="user_id" property="userId"></result>
+        <result column="course_id" property="courseId"></result>
+        <result column="title" property="title"></result>
+        <result column="description" property="description"></result>
+        <collection property="schedules" javaType="java.util.List" ofType="Schedule">
+            <id column="schedule_id" property="scheduleId"></id>
+            <result column="course_id" property="courseId"></result>
+            <result column="order_index" property="orderIndex"></result>
+            <association property="spot" javaType="Spot">
+                <id column="content_id" property="contentId"/>
+                <result column="sido_code" property="sidoCode"/>
+                <result column="gugun_code" property="gugunCode"/>
+                <result column="attraction_title" property="title"/>
+                <result column="first_image" property="img1"/>
+                <result column="first_image2" property="img2"/>
+                <result column="overview" property="description"/>
+                <result column="addr" property="addr"/>
+                <result column="tel" property="tel"/>
+                <result column="image_url" property="imageUrl"/>
+                <result column="latitude" property="latitude"/>
+                <result column="longitude" property="longitude"/>
+            </association>
+        </collection>
+
+    </resultMap>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="courseId">
+        INSERT INTO course (user_id, title, description, created_at, updated_at)
+        VALUES (#{userId}, #{title}, #{description}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <insert id="saveSchedules">
+        INSERT INTO schedule (course_id, spot_id, order_index)
+        VALUES
+        <foreach collection="schedules" item="schedule" separator=",">
+            (#{courseId}, #{schedule.spot.contentId}, #{schedule.orderIndex})
+        </foreach>
+    </insert>
+
+    <delete id="deleteSchedules">
+        delete from schedule
+        where course_id = #{courseId}
+    </delete>
+
+    <update id="update">
+        update course
+        set title = #{title}, description = #{description}
+        where course_id = #{courseId}
+    </update>
+
+    <select id="findById" resultMap="detail">
+        select c.course_id, c.user_id, c.title, c.description,
+        s.schedule_id, s.spot_id, s.order_index,
+        a.title as attraction_title, a.latitude, a.longitude, a.first_image, a.first_image2, a.content_id,
+        ad.overview
+        from course c
+        LEFT JOIN schedule s ON s.course_id = c.course_id
+        LEFT JOIN attraction_info a ON s.spot_id = a.content_id
+        LEFT JOIN attraction_description ad ON ad.content_id = s.spot_id
+        where c.course_id = #{courseId}
+    </select>
+
+    <delete id="delete">
+        delete from course
+        where course_id = #{courseId}
+    </delete>
+
+    <select id="findByUserId" parameterType="int" resultMap="list">
+        select course_id, title, description
+        from course
+        where user_id = #{userId}
+    </select>
+
+</mapper>

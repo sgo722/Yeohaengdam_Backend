@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.yeohaengdam.comment.mapper.CommentMapper">
+
+    <resultMap id="detail" type="Comment">
+        <result column="user_id" property="userId"></result>
+        <result column="article_id" property="articleId"></result>
+        <result column="user_id" property="userId"></result>
+        <result column="user_nickname" property="nickname"></result>
+        <result column="content" property="content"></result>
+        <result column="created_at" property="createdAt"></result>
+        <result column="updated_at" property="updatedAt"></result>
+    </resultMap>
+
+    <insert id="create">
+        insert into comment(user_id, article_id, nickname, content, created_at)
+        values(#{userId}, #{articleId}, #{nickname}, #{content}, now())
+    </insert>
+
+    <select id="findById">
+        select *
+        from comment
+        where comment_id = #{commentId}
+    </select>
+
+    <delete id="delete">
+        delete from comment
+        where comment_id = #{commentId};
+    </delete>
+
+    <update id="update">
+        update comment
+        set content = #{content}
+        where comment_id = #{commentId}
+    </update>
+
+    <select id="findByArticleId" resultMap="detail">
+        select comment.*,
+               users.nickname as user_nickname
+        from comment
+        LEFT JOIN users on comment.user_id = users.user_id
+        where article_id = #{articleId}
+    </select>
+</mapper>

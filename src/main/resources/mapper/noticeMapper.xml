@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.yeohaengdam.notice.mapper.NoticeMapper">
+
+    <resultMap id="NoticeDetail" type="com.ssafy.yeohaengdam.notice.dto.NoticeData$Detail">
+        <id column="notice_id" property="noticeId"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_nickname" property="nickname"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="totalCount" property="totalCount"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+
+    <select id="findAll" resultMap="NoticeDetail">
+        SELECT notice.notice_id,
+            notice.user_id,
+            users.nickname AS user_nickname,
+            notice.title,
+            notice.content,
+            notice.created_at,
+            notice.updated_at,
+        (SELECT COUNT(*) FROM notice
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND notice.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ) AS totalCount
+        FROM notice
+        LEFT JOIN users ON notice.user_id = users.user_id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND notice.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'hit'">
+                ${sortBy} ASC
+            </when>
+            <when test="sortBy != null and sortBy != ''">
+                ${sortBy}
+            </when>
+            <otherwise>
+                notice.created_at DESC
+            </otherwise>
+        </choose>
+        limit #{start}, #{size}
+    </select>
+
+    <select id = "findById" resultMap="NoticeDetail">
+        SELECT notice.notice_id,
+        notice.user_id,
+        users.nickname AS user_nickname,
+        notice.title,
+        notice.content,
+        notice.created_at,
+        notice.updated_at
+        FROM notice
+        LEFT JOIN users ON notice.user_id = users.user_id
+        where notice_id = #{noticeId}
+    </select>
+
+    <insert id="create" parameterType="Notice" useGeneratedKeys="true" keyProperty="noticeId">
+        insert into notice(user_id, title, content, created_at)
+        values (#{userId}, #{title}, #{content}, #{createdAt})
+    </insert>
+
+    <update id="update">
+        update notice
+        set title = #{title}, content = #{content}, updated_at = now()
+        where notice_id = #{noticeId}
+    </update>
+
+    <delete id="delete">
+        delete from notice
+        where notice_id = #{noticeId}
+    </delete>
+
+<select id="findAllNotices" resultMap="NoticeDetail">
+    SELECT notice.notice_id, notice.user_id, users.nickname AS user_nickname, notice.title, notice.content, notice.created_at, notice.updated_at
+    FROM notice LEFT JOIN users ON notice.user_id = users.user_id
+</select>
+</mapper>

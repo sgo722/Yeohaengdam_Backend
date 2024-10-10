@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.yeohaengdam.spot.mapper.SpotMapper">
+
+    <resultMap id="GugunDto" type="Gugun">
+        <result property="gugunCode" column="gugun_code"></result>
+        <result property="gugunName" column="gugun_name"></result>
+    </resultMap>
+
+    <resultMap id="TripInfo" type="Spot">
+        <id property="contentId" column="content_id"/>
+        <result property="contentTypeId" column="content_type_id"/>
+        <result property="title" column="title"/>
+        <result property="addr1" column="addr1"/>
+        <result property="addr2" column="addr2"/>
+        <result property="tel" column="tel"/>
+        <result property="zipcode" column="zipcode"/>
+        <result property="img1" column="first_image"/>
+        <result property="img2" column="first_image2"/>
+        <result property="sidoCode" column="sido_code"/>
+        <result property="gugunCode" column="gugun_code"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="description" column="overview"/>
+    </resultMap>
+
+
+    <select id="findGugunBySido" resultMap="GugunDto">
+        SELECT DISTINCT a.gugun_code, b.gugun_name
+        FROM attraction_info a INNER JOIN gugun b ON a.gugun_code = b.gugun_code
+        WHERE a.sido_code = #{sidoCode} AND b.sido_code = #{sidoCode}
+    </select>
+
+    <select id="findSpotByCondition" resultMap="TripInfo">
+        SELECT *
+        FROM attraction_info a INNER JOIN attraction_description b ON a.content_id = b.content_id
+        WHERE sido_code = #{sidoCode} AND gugun_code = #{gugunCode} AND content_type_id = #{contentCode}
+    </select>
+
+</mapper>
